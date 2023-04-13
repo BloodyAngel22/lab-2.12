@@ -27,11 +27,16 @@ void array_allocate_2(RaggedArray& mas, int new_rows) {
 	}
 }
 
-
 void memory_release(RaggedArray mas) {
 	for (int i = 0; i < mas.rows; i++)
 		free(mas.data[i]);
 	free(mas.data);
+}
+
+void memory_release2(RaggedArray mas_2) {
+	for (int i = 0; i < mas_2.rows; i++)
+		free(mas_2.data[i]);
+	free(mas_2.data);
 }
 
 void print_array(RaggedArray mas) {
@@ -269,7 +274,6 @@ int main() {
 	\n3 - сдвиг строк\nП - последней\n");
 	scanf_s("%d", &workStrings);
 	int counter;
-	//Новый массив
 	if (workStrings == 1) {
 		int new_rows = mas.rows + 1;
 		array_allocate_2(mas_2, new_rows);
@@ -295,13 +299,17 @@ int main() {
 		memory_release(mas);
 	}
 	if (workStrings == 3) {
+		int* arrayLine = (int*)malloc(sizeof(int) * limiter);
 		array_allocate_1(mas_2);
 		for (int i = 0; i < mas.rows; i++) {
 			mas_2.data[i] = (int*)malloc(sizeof(int) * limiter);
 			bool check = false;
+			int counter = 0;
 			for (int j = 0; check == false; j++) {
 				mas_2.data[i][j] = mas.data[i][j];
+				counter++;
 				if (mas.data[i][j] == '\0') {
+					arrayLine[i] = counter;
 					mas_2.data[i][j] = '\0';
 					check = true;
 				}
@@ -326,16 +334,10 @@ int main() {
 				}
 				if (tmp - displacement >= 0) {
 					tmp = tmp - displacement;
-					//printf("%d ", *mas_2[tmp]);
 					mas.data[i] = (int*)malloc(sizeof(int) * limiter);
 					*mas.data[i] = *mas_2.data[tmp];
-					bool check = false;
-					for (int j = 0; check == false; j++) {
+					for (int j = 0; j < arrayLine[tmp]; j++) {
 						mas.data[i][j] = mas_2.data[tmp][j];
-						if (mas_2.data[i][j] == '\0') {
-							mas.data[i][j] = '\0';
-							check = true;
-						}
 					}
 				}
 			}
@@ -344,23 +346,23 @@ int main() {
 			for (int i = 0; i < mas.rows; i++) {
 				int tmp = i;
 				tmp = (tmp + abs(displacement)) % mas.rows;
-				//printf("%d ", *mas_2[tmp]);
 				mas.data[i] = (int*)malloc(sizeof(int) * limiter);
 				*mas.data[i] = *mas_2.data[tmp];
 				bool check = false;
-				for (int j = 0; check == false; j++) {
+				for (int j = 0; j < arrayLine[tmp]; j++) {
 					mas.data[i][j] = mas_2.data[tmp][j];
-					if (mas_2.data[i][j] == '\0') {
-						mas.data[i][j] = '\0';
-						check = true;
-					}
 				}
 			}
 		}
-		print_array(mas);
-		memory_release(mas_2);
 		printf("\nВывод сдвинутого массива\n");
+		print_array(mas);
+		mas_2.rows = mas.rows;
 		memory_release(mas);
+		free(arrayLine);
+		//memory_release2(mas_2);
+		for (int i = 0; i < mas.rows; i++)
+			free(mas_2.data[i]);
+		/*free(mas_2.data);*/
 	}
 
 }

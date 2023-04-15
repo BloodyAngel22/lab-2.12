@@ -218,6 +218,98 @@ void print_bin_file(RaggedArray mas, const char* storage_for_bin, int limiter) {
 	fclose(print_bin);
 }
 
+void addPLine(RaggedArray mas, RaggedArray mas_2, int limiter) {
+	int new_rows = mas.rows + 1;
+	array_allocate_2(mas_2, new_rows);
+	for (int i = 0; i < mas.rows; i++) {
+		mas_2.data[i] = (int*)malloc(sizeof(int) * limiter);
+		bool check = false;
+		for (int j = 0; check == false; j++) {
+			mas_2.data[i][j] = mas.data[i][j];
+			if (mas.data[i][j] == '\0') {
+				mas_2.data[i][j] = '\0';
+				check = true;
+			}
+		}
+	}
+	memory_release(mas);
+	fillPString(mas_2, limiter, new_rows);
+	printArrayP(mas_2, limiter, new_rows);
+	memoryReleaseP(mas_2, new_rows);
+}
+
+void deletePLine(RaggedArray mas, int limiter) {
+	int new_rows = mas.rows - 1;
+	printArrayP(mas, limiter, new_rows);
+	memory_release(mas);
+}
+
+void shiftLine(RaggedArray mas, RaggedArray mas_2, int limiter) {
+	int* arrayLine = (int*)malloc(sizeof(int) * limiter);
+	array_allocate_1(mas_2);
+	for (int i = 0; i < mas.rows; i++) {
+		mas_2.data[i] = (int*)malloc(sizeof(int) * limiter);
+		bool check = false;
+		int counter = 0;
+		for (int j = 0; check == false; j++) {
+			mas_2.data[i][j] = mas.data[i][j];
+			counter++;
+			if (mas.data[i][j] == '\0') {
+				arrayLine[i] = counter;
+				mas_2.data[i][j] = '\0';
+				check = true;
+			}
+		}
+	}
+	memory_release(mas);
+	array_allocate_1(mas);
+	for (int i = 0; i < mas.rows; i++) {
+		for (int j = 0; mas_2.data[i][j] != '\0'; j++) {
+			printf("%d ", mas_2.data[i][j]);
+		}
+		printf("\n");
+	}
+	int displacement;
+	printf("Сдвиг\n");
+	scanf_s("%d", &displacement);
+	if (displacement > 0) {
+		for (int i = 0; i < mas.rows; i++) {
+			int tmp = i;
+			while (tmp - displacement < 0) {
+				tmp = tmp + mas.rows;
+			}
+			if (tmp - displacement >= 0) {
+				tmp = tmp - displacement;
+				mas.data[i] = (int*)malloc(sizeof(int) * limiter);
+				*mas.data[i] = *mas_2.data[tmp];
+				for (int j = 0; j < arrayLine[tmp]; j++) {
+					mas.data[i][j] = mas_2.data[tmp][j];
+				}
+			}
+		}
+	}
+	if (displacement < 0) {
+		for (int i = 0; i < mas.rows; i++) {
+			int tmp = i;
+			tmp = (tmp + abs(displacement)) % mas.rows;
+			mas.data[i] = (int*)malloc(sizeof(int) * limiter);
+			*mas.data[i] = *mas_2.data[tmp];
+			bool check = false;
+			for (int j = 0; j < arrayLine[tmp]; j++) {
+				mas.data[i][j] = mas_2.data[tmp][j];
+			}
+		}
+	}
+	printf("\nВывод сдвинутого массива\n");
+	print_array(mas);
+	mas_2.rows = mas.rows;
+	memory_release(mas);
+	free(arrayLine);
+	for (int i = 0; i < mas.rows; i++)
+		free(mas_2.data[i]);
+	//free(mas_2.data);
+}
+
 int main() {
 	system("chcp 1251");
 	const char storage_for_txt[50] = "storage.txt";
@@ -270,99 +362,18 @@ int main() {
 
 	//Работа со строками
 	int workStrings;
-	printf("\nРабота со строкой\n0 - выход\n1 - добавление П строки\n2 - Удаление П строки\
-	\n3 - сдвиг строк\nП - последней\n");
+	printf("\nРабота со строкой\n0 - выход\n1 - Добавление П строки\n2 - Удаление П строки\
+	\n3 - Сдвиг строк\nП - последней\n");
 	scanf_s("%d", &workStrings);
 	int counter;
 	if (workStrings == 1) {
-		int new_rows = mas.rows + 1;
-		array_allocate_2(mas_2, new_rows);
-		for (int i = 0; i < mas.rows; i++) {
-			mas_2.data[i] = (int*)malloc(sizeof(int) * limiter);
-			bool check = false;
-			for (int j = 0; check == false; j++) {
-				mas_2.data[i][j] = mas.data[i][j];
-				if (mas.data[i][j] == '\0') {
-					mas_2.data[i][j] = '\0';
-					check = true;
-				}
-			}
-		}
-		memory_release(mas);
-		fillPString(mas_2, limiter, new_rows);
-		printArrayP(mas_2, limiter, new_rows);
-		memoryReleaseP(mas_2, new_rows);
+		addPLine(mas, mas_2, limiter);
 	}
 	if (workStrings == 2) {
-		int new_rows = mas.rows - 1;
-		printArrayP(mas, limiter, new_rows);
-		memory_release(mas);
+		deletePLine(mas, limiter);
 	}
 	if (workStrings == 3) {
-		int* arrayLine = (int*)malloc(sizeof(int) * limiter);
-		array_allocate_1(mas_2);
-		for (int i = 0; i < mas.rows; i++) {
-			mas_2.data[i] = (int*)malloc(sizeof(int) * limiter);
-			bool check = false;
-			int counter = 0;
-			for (int j = 0; check == false; j++) {
-				mas_2.data[i][j] = mas.data[i][j];
-				counter++;
-				if (mas.data[i][j] == '\0') {
-					arrayLine[i] = counter;
-					mas_2.data[i][j] = '\0';
-					check = true;
-				}
-			}
-		}
-		memory_release(mas);
-		array_allocate_1(mas);
-		for (int i = 0; i < mas.rows; i++) {
-			for (int j = 0; mas_2.data[i][j] != '\0'; j++) {
-				printf("%d ", mas_2.data[i][j]);
-			}
-			printf("\n");
-		}
-		int displacement;
-		printf("Сдвиг\n");
-		scanf_s("%d", &displacement);
-		if (displacement > 0) {
-			for (int i = 0; i < mas.rows; i++) {
-				int tmp = i;
-				while (tmp - displacement < 0) {
-					tmp = tmp + mas.rows;
-				}
-				if (tmp - displacement >= 0) {
-					tmp = tmp - displacement;
-					mas.data[i] = (int*)malloc(sizeof(int) * limiter);
-					*mas.data[i] = *mas_2.data[tmp];
-					for (int j = 0; j < arrayLine[tmp]; j++) {
-						mas.data[i][j] = mas_2.data[tmp][j];
-					}
-				}
-			}
-		}
-		if (displacement < 0) {
-			for (int i = 0; i < mas.rows; i++) {
-				int tmp = i;
-				tmp = (tmp + abs(displacement)) % mas.rows;
-				mas.data[i] = (int*)malloc(sizeof(int) * limiter);
-				*mas.data[i] = *mas_2.data[tmp];
-				bool check = false;
-				for (int j = 0; j < arrayLine[tmp]; j++) {
-					mas.data[i][j] = mas_2.data[tmp][j];
-				}
-			}
-		}
-		printf("\nВывод сдвинутого массива\n");
-		print_array(mas);
-		mas_2.rows = mas.rows;
-		memory_release(mas);
-		free(arrayLine);
-		//memory_release2(mas_2);
-		for (int i = 0; i < mas.rows; i++)
-			free(mas_2.data[i]);
-		/*free(mas_2.data);*/
+		shiftLine(mas, mas_2, limiter);
 	}
-
+	return 0;
 }

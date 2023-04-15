@@ -127,6 +127,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="FunctionForTornArray.cpp" />
     <ClCompile Include="Source.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -134,6 +135,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="binary_storage.bin" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="FunctionForTornArray.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
